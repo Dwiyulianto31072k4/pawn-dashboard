@@ -417,15 +417,15 @@ with st.sidebar:
 
 # Main content
 # Judul di tengah
-st.markdown('<h1 style="text-align: center; color: #1E3A8A; font-size: 2.5rem; margin-bottom: 20px;">Dashboard Pusat Gadai Indonesia</h1>', unsafe_allow_html=True)
+st.markdown('<h1 style="text-align: center; color: #1E3A8A; font-size: 2.5rem; margin-bottom: 30px;">Dashboard Pusat Gadai Indonesia</h1>', unsafe_allow_html=True)
 
-# Logo di tengah panjang dibawah judul
-_, logo_col, _ = st.columns([1, 2, 1])
+# Logo di tengah dengan ukuran yang lebih proporsional
+_, logo_col, _ = st.columns([2, 1, 2])
 with logo_col:
-    st.image("https://file.dev2-emas.pgindonesia.com/LOGO_PROGRAM/logo.png", width=400)
+    st.image("https://file.dev2-emas.pgindonesia.com/LOGO_PROGRAM/logo.png", width=250)
 
 # Subtitle dibawah logo
-st.markdown('<p style="text-align: center; color: #666; font-size: 1.1rem; margin-top: 10px;">Analisis Pertumbuhan dan Kinerja Bisnis Gadai</p>', unsafe_allow_html=True)
+st.markdown('<p style="text-align: center; color: #666; font-size: 1.1rem; margin-top: 20px; margin-bottom: 30px;">Analisis Pertumbuhan dan Kinerja Bisnis Gadai</p>', unsafe_allow_html=True)
 
 # Loading spinner for effect (simulating data loading)
 with st.spinner("Memuat data terbaru..."):
