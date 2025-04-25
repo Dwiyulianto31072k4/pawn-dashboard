@@ -1079,6 +1079,291 @@ with sim_col2:
 # Footer with update information
 st.markdown('<div class="footer">Dashboard Pusat Gadai Indonesia | Terakhir diperbarui: April 26, 2025 | Data hanya untuk tujuan demonstrasi</div>', unsafe_allow_html=True)
 
+# Ekspansi Outlet Analysis
+st.markdown('<div class="section-header">Analisis Ekspansi Outlet</div>', unsafe_allow_html=True)
+st.subheader("Simulasi Potensi Outlet Baru")
+
+# Create two columns for the expansion analysis
+exp_col1, exp_col2 = st.columns([1, 2])
+
+with exp_col1:
+    st.markdown("### Input Parameter Lokasi")
+    
+    # Input for region
+    region_options = sorted(["DKI Jakarta", "Jawa Barat", "Jawa Tengah", "DI Yogyakarta", "Jawa Timur", 
+                       "Banten", "Sumatera Utara", "Sumatera Barat", "Riau", "Sumatera Selatan",
+                       "Kalimantan Timur", "Sulawesi Selatan", "Bali"])
+    selected_expansion_area = st.selectbox("Pilih Daerah/Kota:", region_options)
+    
+    # Key socio-economic variables
+    st.markdown("#### Data Demografis & Ekonomi")
+    penduduk = st.number_input("Jumlah Penduduk (ribu)", min_value=0, max_value=5000, value=250, step=10)
+    kemiskinan = st.slider("Tingkat Kemiskinan (%)", min_value=0.0, max_value=30.0, value=9.5, step=0.1)
+    umk = st.number_input("UMK (Rp)", min_value=1000000, max_value=6000000, value=3500000, step=100000, format="%d")
+    
+    # Infrastructure variables
+    st.markdown("#### Infrastruktur")
+    lebar_jalan = st.slider("Lebar Jalan (m)", min_value=2, max_value=50, value=12)
+    lebar = st.slider("Lebar Bangunan (m)", min_value=2, max_value=30, value=6)
+    
+    # Nearby facilities
+    st.markdown("#### Fasilitas Sekitar")
+    kompetitor = st.number_input("Jumlah Kompetitor", min_value=0, max_value=20, value=3)
+    ada_pgi = st.checkbox("Sudah Ada Outlet PGI di Sekitar", value=False)
+    
+    col_a, col_b = st.columns(2)
+    with col_a:
+        pasar = st.number_input("Pasar", min_value=0, max_value=10, value=1)
+        toko_elektronik = st.number_input("Toko Elektronik", min_value=0, max_value=50, value=15)
+        toko_handphone = st.number_input("Toko Handphone", min_value=0, max_value=50, value=20)
+    
+    with col_b:
+        minimarket = st.number_input("Minimarket", min_value=0, max_value=50, value=12)
+        restaurant = st.number_input("Restaurant", min_value=0, max_value=50, value=18)
+        pom_bensin = st.number_input("SPBU", min_value=0, max_value=10, value=2)
+    
+    fasilitas_kesehatan = st.number_input("Fasilitas Kesehatan", min_value=0, max_value=20, value=5)
+    universitas = st.number_input("Universitas/Sekolah", min_value=0, max_value=10, value=2)
+    
+    # Target omset
+    omset_target = st.number_input("Target Omset Bulanan (Juta Rp)", min_value=50, max_value=2000, value=350, step=10)
+    
+    # Generate analysis button
+    generate_analysis = st.button("Analisis Potensi Lokasi", type="primary")
+
+# Kolom untuk hasil analisis
+with exp_col2:
+    # If button is clicked, generate analysis
+    if generate_analysis:
+        st.markdown("### Hasil Analisis Potensi Lokasi")
+        
+        # Create a score based on the inputs (simplified model)
+        demographic_score = min(penduduk / 50, 10) - min(kemiskinan / 3, 10) + min(umk / 500000, 10)
+        infrastructure_score = min(lebar_jalan / 5, 10) + min(lebar / 3, 10)
+        
+        facility_score = (
+            min(pasar * 2, 10) + 
+            min(toko_elektronik / 5, 10) + 
+            min(toko_handphone / 5, 10) + 
+            min(minimarket / 5, 10) + 
+            min(restaurant / 5, 10) + 
+            min(pom_bensin * 2, 10) + 
+            min(fasilitas_kesehatan * 1.5, 10) + 
+            min(universitas * 3, 10)
+        ) / 8
+        
+        # Competition has negative impact
+        competition_score = 10 - min(kompetitor * 2, 10)
+        if ada_pgi:
+            competition_score -= 5
+        
+        # Calculate final score with weighting
+        final_score = (
+            demographic_score * 0.35 + 
+            infrastructure_score * 0.15 + 
+            facility_score * 0.30 + 
+            competition_score * 0.20
+        )
+        
+        # Scale to 0-100
+        final_score = min(max(final_score * 10, 0), 100)
+        
+        # Display score with gauge chart
+        fig = go.Figure(go.Indicator(
+            mode = "gauge+number",
+            value = final_score,
+            domain = {'x': [0, 1], 'y': [0, 1]},
+            title = {'text': "Skor Potensi Lokasi"},
+            gauge = {
+                'axis': {'range': [0, 100]},
+                'bar': {'color': "darkblue"},
+                'steps': [
+                    {'range': [0, 30], 'color': "red"},
+                    {'range': [30, 50], 'color': "orange"},
+                    {'range': [50, 70], 'color': "yellow"},
+                    {'range': [70, 100], 'color': "green"}
+                ],
+                'threshold': {
+                    'line': {'color': "red", 'width': 4},
+                    'thickness': 0.75,
+                    'value': 70
+                }
+            }
+        ))
+        
+        fig.update_layout(height=300)
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Recommendation based on score
+        st.markdown("#### Rekomendasi")
+        if final_score >= 80:
+            recommendation = "Sangat Potensial"
+            desc = "Lokasi sangat strategis dengan potensi bisnis tinggi. Direkomendasikan untuk menjadi prioritas utama ekspansi."
+            action = "Lanjutkan ke tahap negosiasi sewa/pembelian dan persiapan pembukaan outlet."
+        elif final_score >= 65:
+            recommendation = "Potensial"
+            desc = "Lokasi memiliki potensi yang baik. Perlu pertimbangan lebih lanjut mengenai beberapa aspek."
+            action = "Lakukan survey lapangan lebih detail dan analisis kompetitor."
+        elif final_score >= 50:
+            recommendation = "Cukup Potensial"
+            desc = "Lokasi memiliki beberapa indikator positif namun juga beberapa tantangan."
+            action = "Pertimbangkan faktor khusus seperti demografi atau infrastruktur tambahan."
+        elif final_score >= 30:
+            recommendation = "Kurang Potensial"
+            desc = "Lokasi kurang strategis dengan beberapa hambatan signifikan."
+            action = "Tidak direkomendasikan kecuali ada faktor khusus yang belum tercakup dalam analisis."
+        else:
+            recommendation = "Tidak Potensial"
+            desc = "Lokasi tidak memenuhi kriteria minimum untuk pembukaan outlet baru."
+            action = "Cari alternatif lokasi lain di area sekitar atau kota lain."
+        
+        st.markdown(f"**Status**: {recommendation}")
+        st.markdown(f"**Deskripsi**: {desc}")
+        st.markdown(f"**Tindakan yang Disarankan**: {action}")
+        
+        # Financial projections
+        st.markdown("#### Proyeksi Keuangan")
+        
+        # Calculate projected performance based on score and target
+        performance_factor = final_score / 100 * random.uniform(0.8, 1.2)  # Add some randomness
+        projected_omset = omset_target * performance_factor
+        
+        # Costs assumptions
+        sewa_bulanan = 15 + random.uniform(-3, 5)  # Juta Rupiah
+        operasional = projected_omset * 0.15  # 15% of omset for operational costs
+        gaji_karyawan = 12 + random.uniform(-1, 2)  # Juta Rupiah
+        
+        # Profit calculation
+        profit = projected_omset - operasional - sewa_bulanan - gaji_karyawan
+        profit_margin = (profit / projected_omset) * 100 if projected_omset > 0 else 0
+        
+        # Breakeven calculation (simplified)
+        monthly_costs = sewa_bulanan + gaji_karyawan
+        variable_cost_rate = 0.15  # Assume 15% variable costs
+        contribution_margin_rate = 1 - variable_cost_rate
+        breakeven_omset = monthly_costs / contribution_margin_rate
+        
+        # ROI calculation (simplified)
+        initial_investment = 150 + random.uniform(-20, 30)  # Juta Rupiah
+        monthly_profit = profit
+        roi_months = initial_investment / monthly_profit if monthly_profit > 0 else float('inf')
+        
+        # Create financial metrics table
+        financial_data = {
+            "Metrik": ["Proyeksi Omset Bulanan", "Biaya Sewa", "Biaya Operasional", "Gaji Karyawan", 
+                      "Profit Bulanan", "Margin Keuntungan", "Breakeven Point", "Modal Awal", "ROI (Bulan)"],
+            "Nilai": [
+                f"Rp {projected_omset:.1f} juta",
+                f"Rp {sewa_bulanan:.1f} juta",
+                f"Rp {operasional:.1f} juta",
+                f"Rp {gaji_karyawan:.1f} juta",
+                f"Rp {profit:.1f} juta",
+                f"{profit_margin:.1f}%",
+                f"Rp {breakeven_omset:.1f} juta",
+                f"Rp {initial_investment:.1f} juta",
+                f"{roi_months:.1f} bulan"
+            ]
+        }
+        
+        # Apply color to profit-related metrics
+        financial_df = pd.DataFrame(financial_data)
+        
+        # Display the table
+        st.table(financial_df)
+        
+        # Add a note about assumptions
+        st.markdown("""
+        <div class="small-text">
+        <strong>Catatan Asumsi:</strong><br>
+        - Proyeksi berdasarkan data historis outlet dengan karakteristik serupa<br>
+        - Biaya operasional termasuk utilitas, keamanan, dan perlengkapan kantor<br>
+        - Modal awal mencakup renovasi, perizinan, dan peralatan<br>
+        - ROI dihitung berdasarkan profit bulanan konsisten
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Risk factors specific to location
+        st.markdown("#### Faktor Risiko Spesifik Lokasi")
+        
+        # Calculate risk factors based on inputs
+        risks = []
+        
+        if kemiskinan > 20:
+            risks.append("Tingkat kemiskinan tinggi (risiko daya beli rendah)")
+        
+        if kompetitor > 5:
+            risks.append("Tingkat kompetisi tinggi")
+            
+        if ada_pgi:
+            risks.append("Potensi kanibalisasi dengan outlet PGI lainnya")
+            
+        if lebar_jalan < 8:
+            risks.append("Akses jalan terbatas")
+            
+        if penduduk < 150:
+            risks.append("Kepadatan populasi rendah")
+            
+        if pasar + minimarket + restaurant < 10:
+            risks.append("Fasilitas komersial sekitar terbatas")
+            
+        # Add some random risks based on selected area
+        area_specific_risks = {
+            "DKI Jakarta": ["Biaya sewa tinggi", "Kepadatan lalu lintas", "Persaingan tinggi"],
+            "Jawa Barat": ["Variasi ekonomi antar wilayah", "Tantangan distribusi"],
+            "Bali": ["Fluktuasi musiman (pariwisata)", "Sensitivitas terhadap isu keamanan global"],
+            "Sumatera Utara": ["Tantangan logistik", "Variasi budaya signifikan"]
+        }
+        
+        if selected_expansion_area in area_specific_risks:
+            specific_risk = random.choice(area_specific_risks[selected_expansion_area])
+            risks.append(specific_risk)
+        
+        # If no risks identified, add positive note
+        if not risks:
+            st.markdown("✅ Tidak ada faktor risiko signifikan teridentifikasi")
+        else:
+            for risk in risks:
+                st.markdown(f"⚠️ {risk}")
+            
+        # Potential mitigation
+        if risks:
+            st.markdown("#### Mitigasi Potensial")
+            mitigations = {
+                "Tingkat kemiskinan tinggi": "Fokus pada produk gadai dengan nilai terjangkau, program edukasi keuangan",
+                "Tingkat kompetisi tinggi": "Diferensiasi layanan, program loyalitas, peningkatan kualitas pelayanan",
+                "Potensi kanibalisasi": "Spesialisasi produk atau segmen, koordinasi strategi pemasaran",
+                "Akses jalan terbatas": "Peningkatan visibilitas, signage yang jelas, layanan pickup",
+                "Kepadatan populasi rendah": "Ekspansi coverage area, layanan mobile/pickup, marketing yang lebih luas",
+                "Fasilitas komersial sekitar terbatas": "Kemitraan dengan bisnis sekitar, program cross-promotion",
+                "Biaya sewa tinggi": "Negosiasi kontrak jangka panjang, optimasi penggunaan ruang",
+                "Kepadatan lalu lintas": "Jam operasional yang diperpanjang, layanan online/booking",
+                "Persaingan tinggi": "Diferensiasi layanan, program insentif khusus",
+                "Variasi ekonomi antar wilayah": "Penyesuaian produk berdasarkan demografi lokal",
+                "Tantangan distribusi": "Kemitraan logistik lokal, optimasi rantai pasokan",
+                "Fluktuasi musiman (pariwisata)": "Diversifikasi produk, program promosi counter-seasonal",
+                "Tantangan logistik": "Kerja sama dengan penyedia logistik lokal, stok cadangan strategis",
+                "Variasi budaya signifikan": "Penyesuaian pendekatan marketing, rekrutmen staf lokal"
+            }
+            
+            for risk in risks:
+                if risk in mitigations:
+                    st.markdown(f"**{risk}**: {mitigations[risk]}")
+    else:
+        # Show placeholder when analysis hasn't been generated
+        st.markdown("""
+        ### Analisis Potensi Lokasi
+        
+        Gunakan panel di sebelah kiri untuk memasukkan data lokasi yang ingin dianalisis sebagai kandidat outlet baru.
+        
+        Sistem akan memberikan:
+        - Skor kelayakan lokasi
+        - Rekomendasi pembukaan outlet
+        - Proyeksi finansial
+        - Analisis risiko khusus lokasi
+        
+        Masukkan data yang diperlukan dan klik "Analisis Potensi Lokasi" untuk melihat hasil.
+        """)
+
 # Competitor Analysis
 st.markdown('<div class="section-header">Analisis Kompetitor</div>', unsafe_allow_html=True)
 
