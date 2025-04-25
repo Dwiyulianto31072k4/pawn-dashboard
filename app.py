@@ -416,8 +416,14 @@ with st.sidebar:
         st.experimental_rerun()
 
 # Main content
-st.markdown('<h1 class="main-header">Dashboard Pusat Gadai Indonesia</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Analisis Pertumbuhan dan Kinerja Bisnis Gadai</p>', unsafe_allow_html=True)
+header_col1, header_col2 = st.columns([1, 5])
+
+with header_col1:
+    st.image("https://file.dev2-emas.pgindonesia.com/LOGO_PROGRAM/logo.png", width=100)
+
+with header_col2:
+    st.markdown('<h1 class="main-header">Dashboard Pusat Gadai Indonesia</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Analisis Pertumbuhan dan Kinerja Bisnis Gadai</p>', unsafe_allow_html=True)
 
 # Loading spinner for effect (simulating data loading)
 with st.spinner("Memuat data terbaru..."):
