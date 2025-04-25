@@ -415,15 +415,19 @@ with st.sidebar:
     if st.button("Reset Semua Filter"):
         st.experimental_rerun()
 
-# Main content
-header_col1, header_col2 = st.columns([1, 5])
+# Main content area with logo and title
+col1, col2, col3 = st.columns([1, 3, 1])
 
-with header_col1:
-    st.image("https://file.dev2-emas.pgindonesia.com/LOGO_PROGRAM/logo.png", width=100)
+with col1:
+    st.image("https://file.dev2-emas.pgindonesia.com/LOGO_PROGRAM/logo.png", width=120)
 
-with header_col2:
-    st.markdown('<h1 class="main-header">Dashboard Pusat Gadai Indonesia</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Analisis Pertumbuhan dan Kinerja Bisnis Gadai</p>', unsafe_allow_html=True)
+with col2:
+    st.markdown('<h1 style="text-align: center; color: #1E3A8A; font-size: 2.5rem;">Dashboard Pusat Gadai Indonesia</h1>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #666; font-size: 1.1rem; margin-top: 0;">Analisis Pertumbuhan dan Kinerja Bisnis Gadai</p>', unsafe_allow_html=True)
+
+with col3:
+    # Kolom kosong untuk penyeimbang
+    st.write("")
 
 # Loading spinner for effect (simulating data loading)
 with st.spinner("Memuat data terbaru..."):
