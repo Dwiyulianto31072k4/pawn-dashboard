@@ -340,7 +340,7 @@ data = generate_dummy_data()
 
 # Sidebar
 with st.sidebar:
-    st.markdown('<div class="logo-container"><div>💰</div><div class="logo-text">PGI</div></div>', unsafe_allow_html=True)
+    st.image("https://file.dev2-emas.pgindonesia.com/LOGO_PROGRAM/logo.png", width=150)
     st.subheader("Dashboard Filters")
     
     # Date range filter
